@@ -1,5 +1,15 @@
 #include <Arduino.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
 
+// Data wire is plugged into port 2 on the Arduino
+#define ONE_WIRE_BUS 25
+
+// Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
+OneWire oneWire(ONE_WIRE_BUS);
+
+// Pass our oneWire reference to Dallas Temperature.
+DallasTemperature sensors(&oneWire);
 /**
  * Created by K. Suwatchai (Mobizt)
  *
@@ -51,7 +61,7 @@ void setup()
 {
 
     Serial.begin(115200);
-
+    sensors.begin();
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
     Serial.print("Connecting to Wi-Fi");
     while (WiFi.status() != WL_CONNECTED)
@@ -99,7 +109,7 @@ void loop()
     if (Firebase.ready() && (millis() - dataMillis > 2000 || dataMillis == 0))
     {
         dataMillis = millis();
-        double temp = temperatures[count];
+        double temp = sensors.getTempCByIndex(0);
        String documentPath = "Temperature/Outside";
        FirebaseJson content;
        content.set("fields/temperature/doubleValue",String(temp).c_str());
